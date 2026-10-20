@@ -2,13 +2,27 @@
 
 import { useState, useEffect } from "react";
 
+type CurrentWeather = {
+  temperature_2m: number;
+  relative_humidity_2m: number;
+  wind_speed_10m: number;
+  weather_code: number;
+};
+
+type DailyForecast = {
+  time: string[];
+  temperature_2m_max: number[];
+  temperature_2m_min: number[];
+  weather_code: number[];
+};
+
 // Maps Open-Meteo's WMO weather codes to emoji icons
-function getWeatherIcon(code) {
+function getWeatherIcon(code: number) {
   if (code === 0) return "☀️"; // Clear sky
   if (code <= 2) return "🌤️"; // Mainly clear / partly cloudy
   if (code === 3) return "☁️"; // Overcast
   if (code >= 45 && code <= 48) return "🌫️"; // Fog
-  if (code >= 51 && code <= 57) return "🌦️"; // Drizzle
+  if (code >= 51 && code <= 57) return "🌧️"; // Drizzle
   if (code >= 61 && code <= 67) return "🌧️"; // Rain
   if (code >= 71 && code <= 77) return "🌨️"; // Snow
   if (code >= 80 && code <= 82) return "🌧️"; // Rain showers
@@ -18,13 +32,13 @@ function getWeatherIcon(code) {
 }
 
 export default function Home() {
-  const [weather, setWeather] = useState(null);
-  const [forecast, setForecast] = useState(null);
+  const [weather, setWeather] = useState<CurrentWeather | null>(null);
+  const [forecast, setForecast] = useState<DailyForecast | null>(null);
   const [city, setCity] = useState("");
   const [cityName, setCityName] = useState("Phnom Penh");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function fetchWeatherForCoords(lat, lon) {
+  async function fetchWeatherForCoords(lat: number, lon: number) {
     const res = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`
     );
@@ -33,7 +47,7 @@ export default function Home() {
     setForecast(data.daily);
   }
 
-  async function handleSearch(e) {
+  async function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
